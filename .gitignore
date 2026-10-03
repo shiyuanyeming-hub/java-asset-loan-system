@@ -1,0 +1,25 @@
+# ビルド成果物
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+
+# ログ・ローカル設定
+*.log
+application-local.properties
+
+# 秘密情報（API キー等は絶対にコミットしない）
+.env
+.env.*
+!.env.example
