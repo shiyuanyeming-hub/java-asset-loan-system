@@ -15,9 +15,11 @@ target/
 # OS
 .DS_Store
 
-# ログ・ローカル設定
+# ログ
 *.log
-application-local.properties
+
+# H2 のローカル DB ファイル（./scripts/run-local.sh が作る）
+data/
 
 # 秘密情報（API キー等は絶対にコミットしない）
 .env
