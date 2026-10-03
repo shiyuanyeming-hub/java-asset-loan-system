@@ -1,0 +1,229 @@
+### 備品一覧の検索
+$ curl -i -X GET http://localhost:8080/api/assets?keyword=PC&size=5 -H 'X-Employee-Number: E1001' 
+HTTP 200
+{
+  "items": [
+    {
+      "id": 1,
+      "managementNumber": "PC-0001",
+      "name": "ThinkPad X1 Carbon",
+      "categoryName": "ノートPC",
+      "manufacturer": "Lenovo",
+      "model": "21HM",
+      "status": "AVAILABLE",
+      "lendable": true,
+      "dueOn": null
+    },
+    {
+      "id": 2,
+      "managementNumber": "PC-0002",
+      "name": "MacBook Pro 14",
+      "categoryName": "ノートPC",
+      "manufacturer": "Apple",
+      "model": "M4 Pro",
+      "status": "AVAILABLE",
+      "lendable": true,
+      "dueOn": null
+    }
+  ],
+  "page": 0,
+  "size": 5,
+  "totalElements": 2,
+  "totalPages": 1
+}
+
+### 貸出申請
+$ curl -i -X POST http://localhost:8080/api/loans -H 'X-Employee-Number: E1001' -d '{"assetId": 1}'
+HTTP 201
+{
+  "id": 1,
+  "status": "REQUESTED",
+  "statusLabel": "申請中",
+  "assetId": 1,
+  "managementNumber": "PC-0001",
+  "assetName": "ThinkPad X1 Carbon",
+  "categoryName": "ノートPC",
+  "requesterId": 3,
+  "requesterName": "社員 E1001",
+  "requesterEmployeeNumber": "E1001",
+  "approverId": null,
+  "approverName": null,
+  "requestedAt": "2026-10-04T02:26:36.254848",
+  "startedOn": null,
+  "dueOn": null,
+  "returnedOn": null,
+  "overdue": false,
+  "rejectReason": null,
+  "returnNote": null
+}
+
+### 承認待ち一覧
+$ curl -i -X GET http://localhost:8080/api/loans/pending -H 'X-Employee-Number: E9001' 
+HTTP 200
+{
+  "items": [
+    {
+      "id": 1,
+      "status": "REQUESTED",
+      "statusLabel": "申請中",
+      "assetId": 1,
+      "managementNumber": "PC-0001",
+      "assetName": "ThinkPad X1 Carbon",
+      "categoryName": "ノートPC",
+      "requesterId": 3,
+      "requesterName": "社員 E1001",
+      "requesterEmployeeNumber": "E1001",
+      "approverId": null,
+      "approverName": null,
+      "requestedAt": "2026-10-04T02:26:36.254848",
+      "startedOn": null,
+      "dueOn": null,
+      "returnedOn": null,
+      "overdue": false,
+      "rejectReason": null,
+      "returnNote": null
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+
+### 承認
+$ curl -i -X POST http://localhost:8080/api/loans/1/approve -H 'X-Employee-Number: E9001' 
+HTTP 200
+{
+  "id": 1,
+  "status": "APPROVED",
+  "statusLabel": "貸出中",
+  "assetId": 1,
+  "managementNumber": "PC-0001",
+  "assetName": "ThinkPad X1 Carbon",
+  "categoryName": "ノートPC",
+  "requesterId": 3,
+  "requesterName": "社員 E1001",
+  "requesterEmployeeNumber": "E1001",
+  "approverId": 1,
+  "approverName": "管理者 太郎",
+  "requestedAt": "2026-10-04T02:26:36.254848",
+  "startedOn": "2026-10-04",
+  "dueOn": "2026-10-18",
+  "returnedOn": null,
+  "overdue": false,
+  "rejectReason": null,
+  "returnNote": null
+}
+
+### 備品詳細
+$ curl -i -X GET http://localhost:8080/api/assets/1 -H 'X-Employee-Number: E1001' 
+HTTP 200
+{
+  "id": 1,
+  "managementNumber": "PC-0001",
+  "name": "ThinkPad X1 Carbon",
+  "categoryId": 1,
+  "categoryName": "ノートPC",
+  "defaultLoanDays": 14,
+  "manufacturer": "Lenovo",
+  "model": "21HM",
+  "status": "LOANED",
+  "lendable": false,
+  "purchasedOn": "2024-04-01",
+  "note": "営業部 共有機",
+  "currentLoan": {
+    "loanId": 1,
+    "requesterName": "社員 E1001",
+    "requesterEmployeeNumber": "E1001",
+    "startedOn": "2026-10-04",
+    "dueOn": "2026-10-18",
+    "overdue": false
+  }
+}
+
+### 重複申請の拒否
+$ curl -i -X POST http://localhost:8080/api/loans -H 'X-Employee-Number: E1001' -d {"assetId": 1}
+HTTP 409
+{
+  "type": "about:blank",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "この備品は現在貸し出せません（状態: LOANED）",
+  "instance": "/api/loans",
+  "code": "INVALID_STATE"
+}
+
+### 返却
+$ curl -i -X POST http://localhost:8080/api/loans/1/return -H 'X-Employee-Number: E9001' -d {"note":"キズなし"}
+HTTP 200
+{
+  "id": 1,
+  "status": "RETURNED",
+  "statusLabel": "返却済み",
+  "assetId": 1,
+  "managementNumber": "PC-0001",
+  "assetName": "ThinkPad X1 Carbon",
+  "categoryName": "ノートPC",
+  "requesterId": 3,
+  "requesterName": "社員 E1001",
+  "requesterEmployeeNumber": "E1001",
+  "approverId": 1,
+  "approverName": "管理者 太郎",
+  "requestedAt": "2026-10-04T02:26:36.254848",
+  "startedOn": "2026-10-04",
+  "dueOn": "2026-10-18",
+  "returnedOn": "2026-10-04",
+  "overdue": false,
+  "rejectReason": null,
+  "returnNote": "キズなし"
+}
+
+### 操作履歴
+$ curl -i -X GET http://localhost:8080/api/loans/1/history -H 'X-Employee-Number: E1001' 
+HTTP 200
+[
+  {
+    "id": 1,
+    "action": "REQUEST",
+    "status": "REQUESTED",
+    "actorName": "社員 E1001",
+    "note": null,
+    "createdAt": "2026-10-04T02:26:36.256556"
+  },
+  {
+    "id": 2,
+    "action": "APPROVE",
+    "status": "APPROVED",
+    "actorName": "管理者 太郎",
+    "note": "返却期限: 2026-10-18",
+    "createdAt": "2026-10-04T02:26:36.306813"
+  },
+  {
+    "id": 3,
+    "action": "RETURN",
+    "status": "RETURNED",
+    "actorName": "管理者 太郎",
+    "note": "キズなし",
+    "createdAt": "2026-10-04T02:26:36.354732"
+  }
+]
+
+### 備品詳細（返却後）
+$ curl -i -X GET http://localhost:8080/api/assets/1 -H 'X-Employee-Number: E1001' 
+HTTP 200
+{
+  "id": 1,
+  "managementNumber": "PC-0001",
+  "name": "ThinkPad X1 Carbon",
+  "categoryId": 1,
+  "categoryName": "ノートPC",
+  "defaultLoanDays": 14,
+  "manufacturer": "Lenovo",
+  "model": "21HM",
+  "status": "AVAILABLE",
+  "lendable": true,
+  "purchasedOn": "2024-04-01",
+  "note": "営業部 共有機",
+  "currentLoan": null
+}
+

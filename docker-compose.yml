@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: asset-loan-db
+    environment:
+      POSTGRES_DB: asset_loan
+      POSTGRES_USER: asset_loan
+      POSTGRES_PASSWORD: asset_loan
+      TZ: Asia/Tokyo
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asset_loan -d asset_loan"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: asset-loan-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/asset_loan
+      SPRING_DATASOURCE_USERNAME: asset_loan
+      SPRING_DATASOURCE_PASSWORD: asset_loan
+      TZ: Asia/Tokyo
+    ports:
+      - "8080:8080"
+
+volumes:
+  db-data:
