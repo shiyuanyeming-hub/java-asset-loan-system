@@ -215,6 +215,10 @@ docker compose up --build        # アプリもコンテナで起動（http://lo
 - Java 21（`./mvnw` が Maven 本体を自動で用意します）
 - Docker を使う場合は Docker Desktop
 
+> 補足: `Dockerfile` / `docker-compose.yml` は用意していますが、
+> **この開発環境では Docker デーモンが起動しておらず、コンテナのビルドと起動は未検証**です。
+> H2（`./scripts/run-local.sh`）での起動と、PostgreSQL 向けの設定内容は確認済みです。
+
 ## 使用方法
 
 操作者は `X-Employee-Number` ヘッダで指定します（デモ用の簡易認証。詳細は「技術的に工夫した点」参照）。
